@@ -1,9 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import RequestCard from "./RequestCard";
-
-const STATUS_ORDER = { PENDING: 0, APPROVED: 1, REJECTED: 2 } as const;
+import LogoutButton from "@/components/LogoutButton";
 
 export default async function DashboardPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  if ((session.user as any).role !== "MANAGER") redirect("/expenses");
   const requests = await prisma.expenseRequest.findMany({
     include: {
       user: true,
@@ -28,9 +32,12 @@ export default async function DashboardPage() {
     <main className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard หัวหน้า</h1>
-          <p className="mt-1 text-sm text-gray-500">จัดการคำขอเบิกค่าเดินทางทั้งหมด</p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard หัวหน้า</h1>
+            <p className="mt-1 text-sm text-gray-500">{session.user.name} · จัดการคำขอเบิกค่าเดินทางทั้งหมด</p>
+          </div>
+          <LogoutButton />
         </div>
 
         {/* Summary cards */}

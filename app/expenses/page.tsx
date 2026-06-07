@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
-
-// hardcode userId=1 until auth
-const MY_USER_ID = 1;
+import LogoutButton from "@/components/LogoutButton";
 
 const STATUS = {
   PENDING: { label: "รอดำเนินการ", badge: "bg-yellow-100 text-yellow-800 border-yellow-200", dot: "bg-yellow-400", bar: "bg-yellow-400" },
@@ -11,8 +11,12 @@ const STATUS = {
 } as const;
 
 export default async function MyExpensesPage() {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+  const userId = parseInt(session.user.id!);
+
   const requests = await prisma.expenseRequest.findMany({
-    where: { userId: MY_USER_ID },
+    where: { userId },
     include: {
       approvals: {
         include: { manager: true },
@@ -36,14 +40,17 @@ export default async function MyExpensesPage() {
         <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">ประวัติคำขอของฉัน</h1>
-            <p className="mt-1 text-sm text-gray-500">สมชาย ใจดี · employee@example.com</p>
+            <p className="mt-1 text-sm text-gray-500">{session.user.name} · {session.user.email}</p>
           </div>
-          <Link
-            href="/expenses/new"
-            className="shrink-0 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 transition-colors"
-          >
-            + ยื่นคำขอใหม่
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <LogoutButton />
+            <Link
+              href="/expenses/new"
+              className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 transition-colors"
+            >
+              + ยื่นคำขอใหม่
+            </Link>
+          </div>
         </div>
 
         {/* Summary */}

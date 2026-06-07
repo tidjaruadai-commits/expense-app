@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Expense App — ระบบเบิกค่าเดินทาง
+
+Next.js 16 · TypeScript · Tailwind CSS · Prisma 7 · SQLite
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
+npx prisma migrate dev
+npx tsx prisma/seed.ts
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Pages
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| URL | หน้าที่ |
+|---|---|
+| `/expenses/new` | พนักงาน — ยื่นคำขอเบิกค่าเดินทาง |
+| `/expenses` | พนักงาน — ดูประวัติคำขอและ comment จากหัวหน้า |
+| `/dashboard` | หัวหน้า — อนุมัติ / ปฏิเสธ พร้อม comment |
 
-## Learn More
+## Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Next.js 16** App Router + Server Actions
+- **Prisma 7** + `@prisma/adapter-better-sqlite3` (dev)
+- **SQLite** สำหรับ dev — เปลี่ยนเป็น PostgreSQL สำหรับ production
+- **Tailwind CSS v4**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production (PostgreSQL)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+แก้ `prisma/schema.prisma` เปลี่ยน provider และ adapter ใน `lib/prisma.ts`:
 
-## Deploy on Vercel
+```prisma
+datasource db {
+  provider = "postgresql"
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```ts
+import { PrismaPg } from "@prisma/adapter-pg"
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
+```

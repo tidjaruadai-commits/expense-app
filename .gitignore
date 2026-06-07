@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+/app/generated/prisma
+*.db
+*.db-shm
+*.db-wal
+
+# uploaded receipts (dev only)
+/public/receipts/*
+!/public/receipts/.gitkeep
